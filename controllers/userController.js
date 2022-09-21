@@ -75,7 +75,30 @@ const editUser = async (req, res) => {
   }
 };
 
+const getAllUser = async (req, res) => {
+  try {
+    const users = await User.find()
+
+    if(!users){
+      return res.status(404).send({
+        status: 0,
+        message: "No Users Right Now"
+      })
+    }
+    else{
+      return res.status(200).send({
+        status: 1,
+        message: "All Users",
+        users
+      })
+    }
+  } catch (error) {
+    return res.status(404).send(error.message);
+  }
+}
+
 module.exports = {
   getUser,
-  editUser
+  editUser,
+  getAllUser
 };

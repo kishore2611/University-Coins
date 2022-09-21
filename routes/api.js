@@ -6,9 +6,10 @@ const { upload } = require('../middlewares/multer')
 
 
 const { register, login, verifyUser, logOut, resendCode, forgotPassword, verifyCode, resetPassword, updatePassword, socialLogin } = require('../controllers/authController')
-const { getUser, editUser } = require('../controllers/userController')
+const { getUser, editUser, getAllUser } = require('../controllers/userController')
 const { getContent, favourite, getNotifications } = require('../controllers/commonController')
-const { getEvents, currentEvents, upcommingEvents, previousEvents, getSingleEvent, getfavorites, getPoints } = require('../controllers/eventController')
+const { getEvents, currentEvents, upcommingEvents, previousEvents, getSingleEvent, getfavorites } = require('../controllers/eventController')
+const { getPoints } = require('../controllers/tarController')
 
 //Authentication
 router.post('/register', upload.single("profilePicture"), register)
@@ -26,14 +27,19 @@ router.post('/socialLogin', socialLogin)
 //User
 router.get('/userDetail', verifyToken, getUser)
 router.put('/editUser', verifyToken, upload.single('profilePicture'), editUser)
+router.get('/allusers', getAllUser)
+
 
 
 //Events
 router.get('/getevents', verifyToken, getEvents)
 router.get('/currentevents', currentEvents)
-router.get('/upcommingevents', upcommingEvents)
+router.get('/upcommingevents',verifyToken, upcommingEvents)
 router.get('/previousevents', previousEvents)
 router.get('/singleevent/:id', getSingleEvent)
+
+
+//Tar
 router.post('/getpoints',verifyToken, getPoints)
 
 

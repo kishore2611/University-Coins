@@ -6,12 +6,18 @@ const Point = require("../models/pointModel");
 
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find();
+    const newdate = moment(Date.now()).format("YYYY-MM-DD");
+    const currentevent = await Event.find({
+      eventDate: newdate,
+    });
+    const upcommingevent = await Event.find({
+      eventDate: { $gt: newdate },
+    });
     const user = await User.findOne({ _id: req.user._id });
 
     // console.log(events)
 
-    if (!events) {
+    if (!currentevent || !upcommingevent) {
       return res.status(400).send({
         status: 0,
         message: "No events found",
@@ -21,7 +27,8 @@ const getEvents = async (req, res) => {
         status: 1,
         message: "Events",
         user: user.userName,
-        events: events,
+        Current: currentevent,
+        UpComming: upcommingevent,
       });
     }
   } catch (error) {
@@ -31,7 +38,7 @@ const getEvents = async (req, res) => {
 
 const currentEvents = async (req, res) => {
   try {
-    var newdate = moment(Date.now()).format("dddd, YYYY Do MMM");
+    var newdate = moment(Date.now()).format("YYYY-MM-DD");
 
     // console.log(newdate);
 
@@ -67,34 +74,75 @@ const currentEvents = async (req, res) => {
 
 const upcommingEvents = async (req, res) => {
   try {
-    var newdate = moment(Date.now()).format("YYYY Do MMM");
+    const fav = req.body.favourite;
 
-    console.log(newdate);
+    const user = await User.findByIdAndUpdate(
+      { _id: req.user._id },
+      { is_favourite: fav },
+      { new: true }
+    );
 
-    const current = await Event.find({
-      eventDate: { $gt: newdate },
-    });
-    // console.log(current.eventName);
+    if (user.is_favourite === 0) {
+      var newdate = moment(Date.now()).format("YYYY-MM-DD");
 
-    if (current.length < 1) {
-      return res.status(400).send({
-        status: 0,
-        message: "no events",
+      // console.log(newdate);
+
+      const upcomming = await Event.find({
+        eventDate: { $gt: newdate },
       });
+      // console.log(upcomming.eventName);
+
+      if (upcomming.length < 1) {
+        return res.status(400).send({
+          status: 0,
+          message: "no events",
+        });
+      } else {
+        // for(var i = 0; i < upcomming.length; i++) {
+        //     var event = upcomming[i];
+        // }
+
+        //   var event = [];
+        //   for (var i = 0; i < upcomming.length; i++) {
+        //     event.push(upcomming[i].eventName, upcomming[i].eventTime, upcomming[i].eventDate, upcomming[i].location.location);
+        //   }
+        return res.status(200).send({
+          status: 1,
+          message: "success",
+          events: upcomming,
+        });
+      }
     } else {
-      // for(var i = 0; i < current.length; i++) {
-      //     var event = current[i];
-      // }
+      var newdate = moment(Date.now()).format("YYYY-MM-DD");
 
-      //   var event = [];
-      //   for (var i = 0; i < current.length; i++) {
-      //     event.push(current[i].eventName, current[i].eventTime, current[i].eventDate, current[i].location.location);
-      //   }
-      return res.status(200).send({
-        status: 1,
-        message: "success",
-        events: current,
+      // console.log(newdate);
+
+      const upcomming = await Event.find({
+        eventDate: { $gt: newdate },
+        "favouriteEvents.user_id": req.user._id,
       });
+      // console.log(upcomming.eventName);
+
+      if (upcomming.length < 1) {
+        return res.status(400).send({
+          status: 0,
+          message: "no favourite events",
+        });
+      } else {
+        // for(var i = 0; i < upcomming.length; i++) {
+        //     var event = upcomming[i];
+        // }
+
+        //   var event = [];
+        //   for (var i = 0; i < upcomming.length; i++) {
+        //     event.push(upcomming[i].eventName, upcomming[i].eventTime, upcomming[i].eventDate, upcomming[i].location.location);
+        //   }
+        return res.status(200).send({
+          status: 1,
+          message: "success",
+          events: upcomming,
+        });
+      }
     }
   } catch (error) {
     return res.status(404).send(error.message);
@@ -103,35 +151,75 @@ const upcommingEvents = async (req, res) => {
 
 const previousEvents = async (req, res) => {
   try {
-    var newdate = moment(await Date.now()).format("dddd, YYYY Do MMM");
-    // var newdate = Date.now("dddd, YYYY Do MMM");
+    const fav = req.body.favourite;
 
-    console.log(newdate);
+    const user = await User.findByIdAndUpdate(
+      { _id: req.user._id },
+      { is_favourite: fav },
+      { new: true }
+    );
 
-    const current = await Event.find({
-      eventDate: { $lt: newdate },
-    });
-    // console.log(current.eventName);
+    if (user.is_favourite === 0) {
+      var newdate = moment(Date.now()).format("YYYY-MM-DD");
 
-    if (current.length < 1) {
-      return res.status(400).send({
-        status: 0,
-        message: "no events",
+      // console.log(newdate);
+
+      const previous = await Event.find({
+        eventDate: { $lt: newdate },
       });
+      // console.log(previous.eventName);
+
+      if (previous.length < 1) {
+        return res.status(400).send({
+          status: 0,
+          message: "no events",
+        });
+      } else {
+        // for(var i = 0; i < previous.length; i++) {
+        //     var event = previous[i];
+        // }
+
+        //   var event = [];
+        //   for (var i = 0; i < previous.length; i++) {
+        //     event.push(previous[i].eventName, previous[i].eventTime, previous[i].eventDate, previous[i].location.location);
+        //   }
+        return res.status(200).send({
+          status: 1,
+          message: "success",
+          events: previous,
+        });
+      }
     } else {
-      // for(var i = 0; i < current.length; i++) {
-      //     var event = current[i];
-      // }
+      var newdate = moment(Date.now()).format("YYYY-MM-DD");
 
-      //   var event = [];
-      //   for (var i = 0; i < current.length; i++) {
-      //     event.push(current[i].eventName, current[i].eventTime, current[i].eventDate, current[i].location.location);
-      //   }
-      return res.status(200).send({
-        status: 1,
-        message: "success",
-        events: current,
+      // console.log(newdate);
+
+      const previous = await Event.find({
+        eventDate: { $lt: newdate },
+        "favouriteEvents.user_id": req.user._id,
       });
+      // console.log(previous.eventName);
+
+      if (previous.length < 1) {
+        return res.status(400).send({
+          status: 0,
+          message: "no favourite events",
+        });
+      } else {
+        // for(var i = 0; i < previous.length; i++) {
+        //     var event = previous[i];
+        // }
+
+        //   var event = [];
+        //   for (var i = 0; i < previous.length; i++) {
+        //     event.push(previous[i].eventName, previous[i].eventTime, previous[i].eventDate, previous[i].location.location);
+        //   }
+        return res.status(200).send({
+          status: 1,
+          message: "success",
+          events: previous,
+        });
+      }
     }
   } catch (error) {
     return res.status(404).send(error.message);
@@ -187,65 +275,6 @@ const getfavorites = async (req, res) => {
   }
 };
 
-const getPoints = async (req, res) => {
-  try {
-    const e = await Event.findOne({_id: req.body.event_id})
-
-    const radius = e.radius
-
-    // console.log(radius)
-
-    const event = await Event.findOne({
-      _id: req.body.event_id,
-      eventLocation: {
-        $geoWithin: {
-          $centerSphere: [
-            [
-              req.user.userLocation.coordinates[0],
-              req.user.userLocation.coordinates[1],
-            ],
-            (radius * 1.60934) / 6378.1,
-          ],
-        },
-      },
-    });
-    if (event) {
-      // console.log
-      const point = new Point({
-        user_id: req.user._id,
-        event_id: req.body.event_id,
-        points: event.points,
-      })
-        // .populate({
-        //   path: "event_id",
-        //   model: "Event",
-        //   select: "eventName , eventDate , eventTime ",
-        // })
-        // .populate({
-        //   path: "user_id",
-        //   model: "User",
-        //   select: "userName , userLocation.location ",
-        // });
-
-      await point.save();
-
-      return res.status(200).send({
-        status: 1,
-        message: "point Received",
-        point,
-      });
-    } else {
-      return res.status(400).send({
-        status: 0,
-        message: "No Points",
-      });
-    }
-    // console.log(event)
-  } catch (error) {
-    return res.status(404).send(error.message);
-  }
-};
-
 module.exports = {
   getEvents,
   currentEvents,
@@ -253,5 +282,4 @@ module.exports = {
   previousEvents,
   getSingleEvent,
   getfavorites,
-  getPoints,
 };

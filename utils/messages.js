@@ -30,12 +30,12 @@ const get_messages = async (object, callback) => {
   )
     .populate({
       path: "sender_id",
-      model: "User, Admin",
+      model: "User",
       select: "userName , profilePicture",
     })
     .populate({
       path: "receiver_id",
-      model: "User, Admin",
+      model: "User",
       select: "userName , profilePicture",
     });
 };
@@ -55,29 +55,38 @@ const send_message = async (object, callback) => {
         } else {
           callback(results_query);
         }
-      }).aggregate([
-        { $lookup:
-            {
+      })
+        .aggregate([
+          {
+            $lookup: {
               from: "User",
-              let: { post_likes: "$likes", post_title: "$title"},
+              let: { post_likes: "$likes", post_title: "$title" },
               pipeline: [
-                   { $match:
-                       { $expr:
-                           { $and:
-                               [
-                                  { $gt: [ "$likes", "$$post_likes"] },
-                                  { $eq: ["$$post_title", "$postTitle" ] }
-                               ]
-                           }
-                       }
-                   }
-               ],
-               as: "comments"
-               }
-        }
-       ])
-      // .populate({ path: "sender_id", model: "User, Admin", select: "userName , profilePicture" })
-      // .populate({ path: "receiver_id", model: "User, Admin", select: "userName , profilePicture" })
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $gt: ["$likes", "$$post_likes"] },
+                        { $eq: ["$$post_title", "$postTitle"] },
+                      ],
+                    },
+                  },
+                },
+              ],
+              as: "comments",
+            },
+          },
+        ])
+        .populate({
+          path: "sender_id",
+          model: "User",
+          select: "userName , profilePicture",
+        })
+        .populate({
+          path: "receiver_id",
+          model: "User",
+          select: "userName , profilePicture",
+        });
     }
   });
 };

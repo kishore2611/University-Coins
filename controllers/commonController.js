@@ -1,4 +1,5 @@
 const Content = require("../models/contentModel");
+const Event = require("../models/eventModel");
 const Favourite = require("../models/favouriteModel");
 
 const getContent = async (req, res) => {
@@ -56,6 +57,17 @@ const favourite = async (req, res) => {
 
         await add.save();
 
+        const check = await Event.findOneAndUpdate(
+          { _id: req.body.event_id },
+          {
+            $push: {
+              favouriteEvents: { user_id: req.user._id },
+            },
+          },
+          { new: true }
+        );
+        console.log(check);
+
         return res.status(200).send({
           status: 1,
           message: "Event has added to your favourite list",
@@ -66,7 +78,19 @@ const favourite = async (req, res) => {
           user_id: req.user._id,
           event_id: req.body.event_id,
         });
-        remove.delete();
+        await remove.delete();
+
+        const check = await Event.findOneAndUpdate(
+          { _id: req.body.event_id },
+          {
+            $pull: {
+              favouriteEvents: { user_id: req.user._id },
+            },
+          },
+          { new: true }
+        );
+        console.log(check);
+
         return res.status(200).send({
           status: 1,
           message: "Event has removed from your favourite list",
@@ -92,13 +116,11 @@ const getNotifications = async (req, res) => {
     if (!notification) {
       return res.status(404).send({ status: 0, message: "No Notification" });
     } else {
-      return res
-        .status(200)
-        .send({
-          status: 1,
-          message: "notification",
-          data: { notification: notification },
-        });
+      return res.status(200).send({
+        status: 1,
+        message: "notification",
+        data: { notification: notification },
+      });
     }
   } catch (error) {
     return res.status(404).send(error.message);

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const moment = require('moment')
+const moment = require("moment");
 
 let eventSchema = new Schema(
   {
@@ -11,40 +11,45 @@ let eventSchema = new Schema(
     },
     eventDate: {
       type: String,
-      default: null
+      default: null,
     },
     eventTime: {
       type: String,
-      default: null
+      default: null,
     },
     eventDiscription: {
       type: String,
       default: null,
     },
-    radius: {
+    favourite:{
       type: Number,
-      default: 0.5
+      default: 0
     },
+    favouriteEvents: [
+      {
+        user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      },
+    ],
     eventLocation: {
       location: {
         type: String,
-        default: null
+        default: null,
       },
       type: {
         type: String,
-        enum: ['Point'],
+        enum: ["Point"],
         required: false,
-        default:"Point"
+        default: "Point",
       },
       coordinates: {
         type: [Number],
-        required: false
-      }
+        required: false,
+      },
     },
-    points: {
-      type: Number,
-      default: null
-    }
+    // points: {
+    //   type: Number,
+    //   default: null
+    // }
   },
   {
     timestamps: true,

@@ -4,15 +4,17 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const http = require("http");
+// const https = require("https");
 const bodyParser = require("body-parser");
 const server = http.createServer(app);
 // const {push_notifications} = require("./utils/push_notification");
+// const User = require("./models/userModel")
 
 const { get_messages, send_message } = require("./utils/messages");
 
 var io = require("socket.io")(server, {
   cors: {
-    origin: "http://localhost:9000",
+    origin: "",
     methods: ["GET", "POST", "PATCH", "DELETE"],
     credentials: false,
     transports: ["websocket", "polling"],
@@ -52,7 +54,7 @@ app.use("/api", apiRoutes);
 const adminApiRoutes = require("./routes/adminApi");
 const User = require("./models/userModel");
 const Notification = require("./models/notificationModel");
-const { push_notifications } = require("./utils/push_notification");
+const { push_notifications } = require("./utils/push_notification")
 app.use("/admin", adminApiRoutes);
 
 /** Content seeder */

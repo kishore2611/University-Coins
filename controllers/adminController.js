@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Event = require("../models/eventModel");
 const moment = require("moment");
+const Tar = require("../models/tarHeelModel");
 
 const adminRegister = async (req, res) => {
   if (!req.body.email) {
@@ -214,7 +215,6 @@ const postEvent = async (req, res) => {
         eventPicture = req.files.path;
       }
 
-      
       const { lat, long } = req.body;
 
       //Radius
@@ -261,18 +261,16 @@ const postEvent = async (req, res) => {
       const date = moment(req.body.eventDate, [
         moment.ISO_8601,
         "DD/MM/YYYY",
-      ]).format("dddd, Do MMM YYYY");
+      ]).format("YYYY-MM-DD"); 
 
       const time = moment(req.body.eventTime, [
         moment.ISO_8601,
         "hh:mm",
-      ]).format("hh:mm a");
+      ]).format("HH:mm a");
 
       // const time = moment(req.body.eventTime).format('DDThh:mm')
       // console.log(moment(date).format('Thh:mm'))
       // const time = req.body.eventTime
-
-      
 
       const event = new Event({
         eventPicture: files,
@@ -280,7 +278,7 @@ const postEvent = async (req, res) => {
         eventDate: date,
         eventTime: time,
         eventDiscription: req.body.eventDiscription,
-        points: req.body.points,
+        // points: req.body.points,
         "eventLocation.location": req.body.location,
         "eventLocation.coordinates": [lat, long],
 
@@ -306,10 +304,56 @@ const postEvent = async (req, res) => {
             eventDate: event.eventDate,
             eventTime: event.eventTime,
             eventDiscription: event.eventDiscription,
-            points: event.points,
+            // points: event.points,
             eventLocation: event.eventLocation.location,
             eventLocationType: event.eventLocation.type,
             eventLocationCoordinates: event.eventLocation.coordinates,
+          },
+        });
+      }
+    }
+  } catch (error) {
+    return res.status(404).send(error.message);
+  }
+};
+
+const postPoints = async (req, res) => {
+  try {
+    if (!req.body.points) {
+      return res.status(400).send({
+        status: 0,
+        message: "points field is required.",
+      });
+    } else {
+
+      // console.log(req.body)
+      const { lat, long } = req.body;
+
+      const tar = new Tar({
+        points: req.body.points,
+        radius: req.body.radius,
+        "tarLocation.location": req.body.location,
+        "tarLocation.coordinates": [lat, long],
+      });
+
+      await tar.save();
+
+      // console.log(tar)
+
+      if (!tar) {
+        return res.status(400).send({
+          status: 0,
+          message: "event not saved",
+        });
+      } else {
+        return res.status(200).send({
+          status: 1,
+          message: "tar Points saved",
+          data: {
+            points: tar.points,
+            radius: tar.radius,
+            tarLocationType: tar.tarLocation.type,
+            tarLocationCoordinates: tar.tarLocation.coordinates,
           },
         });
       }
@@ -323,4 +367,5 @@ module.exports = {
   adminRegister,
   adminLogin,
   postEvent,
+  postPoints,
 };

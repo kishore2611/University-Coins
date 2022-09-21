@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const User = require("../models/userModel");
 const Event = require("../models/eventModel");
+const Tar = require("../models/tarHeelModel");
 const moment = require("moment");
 
 let pointSchema = new Schema(
@@ -10,9 +11,9 @@ let pointSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    event_id: {
+    tar_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Event",
+      ref: "Tar",
     },
     points: {
       type: Number,

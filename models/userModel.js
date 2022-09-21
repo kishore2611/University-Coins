@@ -31,18 +31,18 @@ let userSchema = new Schema(
     userLocation: {
       location: {
         type: String,
-        default: null
+        default: null,
       },
       type: {
         type: String,
-        enum: ['Point'],
+        enum: ["Point"],
         required: false,
-        default:"Point"
+        default: "Point",
       },
       coordinates: {
         type: [Number],
-        required: false
-      }
+        required: false,
+      },
     },
     bio: {
       type: String,
@@ -53,6 +53,10 @@ let userSchema = new Schema(
       default: null,
     },
     is_verified: {
+      type: Number,
+      default: 0,
+    },
+    is_favourite:{
       type: Number,
       default: 0,
     },
