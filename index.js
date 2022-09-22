@@ -11,6 +11,8 @@ const server = http.createServer(app);
 // const User = require("./models/userModel")
 
 const { get_messages, send_message } = require("./utils/messages");
+const { update_location } = require("./utils/location");
+
 
 var io = require("socket.io")(server, {
   cors: {
@@ -84,6 +86,26 @@ dbSeed().then(() => {
 // Run when client connects
 io.on("connection", (socket) => {
   console.log("socket connection ID:" + socket.id);
+  //Location Emit
+  socket.on("update_location", async function (object) {
+    var lat = "user_" + object.lat;
+    var long = "user_" + object.long;
+    update_location(object, function (response_obj) {
+      if (response_obj) {
+        console.log("update_location has been successfully executed...");
+        io.to(lat)
+          .to(long)
+          .emit("response", { object_type: "update_location", data: response_obj });
+      } else {
+        console.log("update_location has been failed...");
+        io.to(lat).to(long).emit("error", {
+          object_type: "update_location",
+          message: "There is some problem in location...",
+        });
+      }
+    });
+  })
+  //Location End
   socket.on("get_messages", async function (object) {
     var user_room = "user_" + object.sender_id;
     socket.join(user_room);

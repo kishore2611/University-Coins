@@ -379,27 +379,31 @@ const forgotPassword = async (req, res) => {
 
             User.findByIdAndUpdate(
               user._id,
-              { verification_code: verificationCode },
-              (err, _result) => {
-                if (err) {
-                  res.status(400).send({
-                    status: 0,
-                    message: "Something went wrong.",
-                  });
-                }
-                if (_result) {
-                  sendEmail(user.email, verificationCode, "Forgot Password");
-                  res.status(200).send({
-                    status: 1,
-                    message: "Code successfully send to email.",
-                    data: {
-                      user_id: user._id,
-                      verification_code: verificationCode,
-                    },
-                  });
-                }
-              }
-            );
+              { verification_code: 123456 },{new:true})
+              sendEmail(user.email, verificationCode, "Forgot Password");
+
+              res.status(200).send({
+                status: 1,
+                message: "Code successfully send to email.",
+                data: {
+                  user_id: user._id,
+                  verification_code: user.verification_code,
+                },
+              });
+
+
+              // (err, _result) => {
+              //   if (err) {
+              //     res.status(400).send({
+              //       status: 0,
+              //       message: "Something went wrong.",
+              //     });
+              //   }
+                // if (_result) {
+                  
+                // }
+              // }
+            // );
           }
         })
         .catch((err) => {
